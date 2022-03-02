@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2022. ICRL
+ * See the file LICENSE.md for copying permission.
+ */
+
+@import "uikit/dist/css/uikit.min.css";
+
+:root {
+    --white-color: white;
+    --dark-color: #1e1e1e;
+}

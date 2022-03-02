@@ -1,0 +1,87 @@
+<!--
+  ~ Copyright (c) 2022. ICRL
+  ~ See the file LICENSE.md for copying permission.
+  -->
+
+<!DOCTYPE html>
+<html lang="en" class="uk-background-secondary">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title>Setting</title>
+</head>
+<body>
+
+<main>
+    <div id="index-tab" class="uk-light">
+        <div class="uk-position-center">
+            <h1 class="uk-text-lead uk-heading-line"><span>Plocky <span class="uk-text-meta">v 1.0</span></span></h1>
+
+            <div>
+                <button id="create-new-button" class="uk-button uk-button-primary">CREATE NEW PROJECT</button>
+
+                <button id="open-button" class="uk-button uk-button-primary">OPEN PROJECT</button>
+            </div>
+        </div>
+
+        <button class="uk-position-bottom-right uk-button uk-button-link uk-padding-small">CONFIG</button>
+    </div>
+
+    <div id="create-tab" class="uk-light" hidden>
+        <div class="uk-padding-large">
+            <form id="create-form">
+                <fieldset class="uk-fieldset">
+                    <legend class="uk-legend">Settings</legend>
+
+                    <div class="uk-margin">
+                        <label for="group-id" class="uk-form-label">Group Id <a href="https://maven.apache.org/guides/mini/guide-naming-conventions.html" class="uk-text-meta">(What is Group Id?)</a></label>
+                        <div class="uk-form-controls">
+                            <input id="group-id" class="uk-input uk-text-lowercase" type="text" required>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="artifact-id" class="uk-form-label">Artifact Id</label>
+                        <div class="uk-form-controls">
+                            <input id="artifact-id" class="uk-input uk-text-lowercase" type="text" required>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="project-name" class="uk-form-label">Project Name</label>
+                        <div class="uk-form-controls">
+                            <input id="project-name" class="uk-input uk-text-capitalize" type="text" required>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="version" class="uk-form-label">Version</label>
+                        <div class="uk-form-controls">
+                            <input id="version" class="uk-input" type="text" value="1.0.0" required>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label for="minecraft-version" class="uk-form-label">Minecraft Version</label>
+                        <div class="uk-form-controls">
+                            <input id="minecraft-version" class="uk-input" type="text" value="1.12" readonly>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <button id="create-button" class="uk-button uk-button-primary" type="submit">CREATE</button>
+                        <button id="cancel-button" class="uk-button uk-button-danger" type="button">CANCEL</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</main>
+
+</body>
+<script src="setting.js"></script>
+</html>

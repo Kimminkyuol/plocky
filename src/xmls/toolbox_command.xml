@@ -1,0 +1,529 @@
+<!--
+  ~ Copyright (c) 2022. ICRL
+  ~ See the file LICENSE.md for copying permission.
+  -->
+
+<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+    <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+        <block type="controls_if"/>
+        <block type="logic_compare"/>
+        <block type="logic_operation"/>
+        <block type="logic_negate"/>
+        <block type="logic_boolean"/>
+        <block type="logic_null"/>
+        <block type="logic_ternary"/>
+    </category>
+    <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+        <block type="controls_repeat_ext">
+            <value name="TIMES">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="controls_whileUntil"/>
+        <block type="controls_for">
+            <value name="FROM">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="TO">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+            <value name="BY">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="controls_forEach"/>
+        <block type="controls_flow_statements"/>
+    </category>
+    <category name="Math" colour="%{BKY_MATH_HUE}">
+        <block type="math_number">
+            <field name="NUM">123</field>
+        </block>
+        <block type="math_arithmetic">
+            <value name="A">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="B">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_single">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">9</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_trig">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">45</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_constant"/>
+        <block type="math_number_property">
+            <value name="NUMBER_TO_CHECK">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_round">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">3.1</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_on_list"/>
+        <block type="math_modulo">
+            <value name="DIVIDEND">
+                <shadow type="math_number">
+                    <field name="NUM">64</field>
+                </shadow>
+            </value>
+            <value name="DIVISOR">
+                <shadow type="math_number">
+                    <field name="NUM">10</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_constrain">
+            <value name="VALUE">
+                <shadow type="math_number">
+                    <field name="NUM">50</field>
+                </shadow>
+            </value>
+            <value name="LOW">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="HIGH">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_random_int">
+            <value name="FROM">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="TO">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="math_random_float"/>
+        <block type="math_atan2">
+            <value name="X">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+            <value name="Y">
+                <shadow type="math_number">
+                    <field name="NUM">1</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <category name="Text" colour="%{BKY_TEXTS_HUE}">
+        <block type="text"/>
+        <block type="text_join"/>
+        <block type="text_append">
+            <value name="TEXT">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="text_length">
+            <value name="VALUE">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_isEmpty">
+            <value name="VALUE">
+                <shadow type="text">
+                    <field name="TEXT"/>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_indexOf">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{textVariable}</field>
+                </block>
+            </value>
+            <value name="FIND">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_charAt">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{textVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="text_getSubstring">
+            <value name="STRING">
+                <block type="variables_get">
+                    <field name="VAR">{textVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="text_changeCase">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_trim">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="text_print">
+            <value name="TEXT">
+                <shadow type="text">
+                    <field name="TEXT">abc</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <category name="Lists" colour="%{BKY_LISTS_HUE}">
+        <block type="lists_create_with">
+            <mutation items="0"/>
+        </block>
+        <block type="lists_create_with"/>
+        <block type="lists_repeat">
+            <value name="NUM">
+                <shadow type="math_number">
+                    <field name="NUM">5</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="lists_length"/>
+        <block type="lists_isEmpty"/>
+        <block type="lists_indexOf">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{listVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_getIndex">
+            <value name="VALUE">
+                <block type="variables_get">
+                    <field name="VAR">{listVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_setIndex">
+            <value name="LIST">
+                <block type="variables_get">
+                    <field name="VAR">{listVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_getSublist">
+            <value name="LIST">
+                <block type="variables_get">
+                    <field name="VAR">{listVariable}</field>
+                </block>
+            </value>
+        </block>
+        <block type="lists_split">
+            <value name="DELIM">
+                <shadow type="text">
+                    <field name="TEXT">,</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="lists_sort"/>
+    </category>
+    <category name="Colour" colour="%{BKY_COLOUR_HUE}">
+        <block type="colour_picker"/>
+        <block type="colour_random"/>
+        <block type="colour_rgb">
+            <value name="RED">
+                <shadow type="math_number">
+                    <field name="NUM">100</field>
+                </shadow>
+            </value>
+            <value name="GREEN">
+                <shadow type="math_number">
+                    <field name="NUM">50</field>
+                </shadow>
+            </value>
+            <value name="BLUE">
+                <shadow type="math_number">
+                    <field name="NUM">0</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="colour_blend">
+            <value name="COLOUR1">
+                <shadow type="colour_picker">
+                    <field name="COLOUR">#ff0000</field>
+                </shadow>
+            </value>
+            <value name="COLOUR2">
+                <shadow type="colour_picker">
+                    <field name="COLOUR">#3333ff</field>
+                </shadow>
+            </value>
+            <value name="RATIO">
+                <shadow type="math_number">
+                    <field name="NUM">0.5</field>
+                </shadow>
+            </value>
+        </block>
+    </category>
+    <sep/>
+    <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
+    <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
+    <sep/>
+    <category name="Command" colour="65">
+        <block type="command"/>
+        <block type="command_player"/>
+        <block type="command_arg">
+            <value name="INDEX">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+    </category>
+    <category name="Executor" colour="160">
+        <block type="executor_action_bar">
+            <value name="TEXT">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_broadcast">
+            <value name="TEXT">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_burn">
+            <value name="TIME">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_clear_entity">
+            <value name="RADIUS">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_clear_potion"/>
+        <block type="executor_close_gui"/>
+        <block type="executor_command">
+            <value name="COMMAND">
+                <shadow type="text">
+                    <field name="TEXT">help</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="executor_console_command">
+            <value name="COMMAND">
+                <shadow type="text">
+                    <field name="TEXT">help</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="executor_db_put">
+            <value name="KEY">
+                <shadow type="text"/>
+            </value>
+            <value name="VALUE">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_db_save"/>
+        <block type="executor_op_command">
+            <value name="COMMAND">
+                <shadow type="text">
+                    <field name="TEXT">help</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="executor_explosion">
+            <value name="POWER">
+                <shadow type="math_number"/>
+            </value>
+            <value name="FIRE">
+                <shadow type="logic_boolean"/>
+            </value>
+        </block>
+        <block type="executor_give"/>
+        <block type="executor_kill"/>
+        <block type="executor_kick">
+            <value name="DUE">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_lightning"/>
+        <block type="executor_log">
+            <value name="TEXT">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_message">
+            <value name="TEXT">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_money">
+            <value name="MONEY">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_permission">
+            <value name="PERMISSION">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_potion">
+            <value name="TIER">
+                <shadow type="math_number"/>
+            </value>
+            <value name="TIME">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_block">
+            <value name="MATERIAL">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="executor_set_health">
+            <value name="HEALTH">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_saturation">
+            <value name="SATURATION">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_exp">
+            <value name="EXP">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_walk_speed">
+            <value name="SPEED">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_fly_speed">
+            <value name="SPEED">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_set_fly_mode">
+            <value name="MODE">
+                <shadow type="logic_boolean"/>
+            </value>
+        </block>
+        <block type="executor_set_game_mode"/>
+        <block type="executor_set_max_health">
+            <value name="HEALTH">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_exit"/>
+        <block type="executor_time">
+            <value name="WORLD">
+                <shadow type="text"/>
+            </value>
+            <value name="TIME">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_teleport"/>
+        <block type="executor_velocity">
+            <value name="X">
+                <shadow type="math_number"/>
+            </value>
+            <value name="Y">
+                <shadow type="math_number"/>
+            </value>
+            <value name="Z">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_wait">
+            <value name="TIME">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+        <block type="executor_weather">
+            <value name="WORLD">
+                <shadow type="text"/>
+            </value>
+            <value name="STORM">
+                <shadow type="logic_boolean"/>
+            </value>
+        </block>
+    </category>
+    <category name="Player" colour="230">
+        <block type="player_get_by_name">
+            <value name="NAME">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="player_get_by_uuid">
+            <value name="UUID">
+                <shadow type="text"/>
+            </value>
+        </block>
+        <block type="player_get_string"/>
+        <block type="player_get_number"/>
+        <block type="player_get_boolean"/>
+        <block type="player_get_location"/>
+        <block type="player_get_item"/>
+        <block type="player_get_any">
+            <value name="KEY">
+                <shadow type="text"/>
+            </value>
+        </block>
+    </category>
+    <category name="Location" colour="290">
+        <block type="location">
+            <value name="WORLD">
+                <shadow type="text"/>
+            </value>
+            <value name="X">
+                <shadow type="math_number"/>
+            </value>
+            <value name="Y">
+                <shadow type="math_number"/>
+            </value>
+            <value name="Z">
+                <shadow type="math_number"/>
+            </value>
+        </block>
+    </category>
+</xml>
