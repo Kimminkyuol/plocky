@@ -1,15 +1,7 @@
-.idea/**/*
-
-node_modules
+node_modules/
+dist/
 .DS_Store
-Thumbs.db
 *.log
-
-/dist
-/temp
-
-# ignore everything in 'app' folder what had been generated from 'src' folder
-/app/app.js
-/app/main.js
-/app/settings.js
-/app/**/*.map
+.env
+.env.local
+.vite/

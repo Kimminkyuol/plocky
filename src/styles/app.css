@@ -1,0 +1,85 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'highlight.js/styles/atom-one-dark.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Blockly workspace container */
+.blockly-workspace {
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f0f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3a5c;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6b6b9a;
+}
+
+/* Code viewer */
+.code-viewer pre {
+  margin: 0 !important;
+  padding: 16px !important;
+  background: transparent !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.code-viewer .hljs {
+  background: transparent !important;
+}
+
+/* Smooth transitions */
+.transition-panel {
+  transition: width 0.2s ease, opacity 0.2s ease;
+}
+
+/* Blockly dark theme override */
+.blocklySvg {
+  background-color: #0f0f1a !important;
+}
+
+.blocklyWorkspace {
+  background-color: #0f0f1a !important;
+}
+
+/* File item hover */
+.file-item {
+  transition: background-color 0.15s ease;
+}
+.file-item:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+.file-item.active {
+  background-color: rgba(99, 102, 241, 0.2);
+  border-left: 2px solid #6366f1;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.7);
+}
