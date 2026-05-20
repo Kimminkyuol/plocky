@@ -536,62 +536,414 @@ function getEventToolbox() {
   <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
   <sep/>
   <category name="Event" colour="65">
-    <block type="event_cancel"/><block type="event_get"/>
-    <block type="event_server_state_change"/><block type="event_player_interact"/>
-    <block type="event_player_walk"/><block type="event_inventory"/>
-  </category>
-  <category name="Executor" colour="160">
-    <block type="executor_action_bar"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_send_title"><value name="TITLE"><shadow type="text"/></value><value name="SUBTITLE"><shadow type="text"/></value><value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value><value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
-    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_wait"><value name="TIME"><shadow type="math_number"/></value></block>
-  </category>
-  <category name="Player" colour="230">
-    <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="player_get_string"/><block type="player_get_number"/>
-    <block type="player_get_boolean"/><block type="player_get_location"/><block type="player_get_item"/>
-  </category>
-  <category name="Location" colour="290">
-    <block type="location"><value name="WORLD"><shadow type="text"/></value><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"/></value><value name="Z"><shadow type="math_number"/></value></block>
-  </category>
-</xml>`
+            <category name="Event control" colour="65">
+                <block type="event_cancel"></block>
+                <block type="event_get"></block>
+                <block type="event_set_damage"><value name="DAMAGE"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+                <block type="event_set_message"><value name="MESSAGE"><shadow type="text"></shadow></value></block>
+            </category>
+            <category name="Player events" colour="65">
+                <block type="event_player_interact"></block>
+                <block type="event_player_join"></block>
+                <block type="event_player_quit"></block>
+                <block type="event_player_walk"></block>
+                <block type="event_player_death"></block>
+                <block type="event_player_respawn"></block>
+                <block type="event_chat"></block>
+                <block type="event_player_drop_item"></block>
+                <block type="event_player_pickup_item"></block>
+                <block type="event_player_level_change"></block>
+                <block type="event_food_level_change"></block>
+                <block type="event_player_sneak"></block>
+                <block type="event_player_sprint"></block>
+                <block type="event_player_teleport"></block>
+                <block type="event_inventory"></block>
+            </category>
+            <category name="Entity events" colour="65">
+                <block type="event_entity_damage"></block>
+                <block type="event_entity_damage_by_entity"></block>
+                <block type="event_entity_spawn"></block>
+                <block type="event_entity_death"></block>
+                <block type="event_entity_explode"></block>
+                <block type="event_projectile_hit"></block>
+            </category>
+            <category name="Block events" colour="65">
+                <block type="event_block_break"></block>
+                <block type="event_block_place"></block>
+            </category>
+            <category name="Server events" colour="65">
+                <block type="event_server_state_change"></block>
+            </category>
+        </category>
+
+        <!-- ── Minecraft: Actions ── -->
+        <category name="Executor" colour="160">
+            <category name="Messaging" colour="160">
+                <block type="executor_message"><value name="TEXT"><shadow type="text"></shadow></value></block>
+                <block type="executor_action_bar"><value name="TEXT"><shadow type="text"></shadow></value></block>
+                <block type="executor_send_title">
+                    <value name="TITLE"><shadow type="text"></shadow></value>
+                    <value name="SUBTITLE"><shadow type="text"></shadow></value>
+                    <value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                    <value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value>
+                    <value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+                </block>
+                <block type="executor_broadcast"><value name="TEXT"><shadow type="text"></shadow></value></block>
+                <block type="executor_log"><value name="TEXT"><shadow type="text"></shadow></value></block>
+            </category>
+            <category name="Player actions" colour="160">
+                <block type="executor_teleport"></block>
+                <block type="executor_kick"><value name="DUE"><shadow type="text"></shadow></value></block>
+                <block type="executor_kill"></block>
+                <block type="executor_set_game_mode"></block>
+                <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="executor_set_max_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="executor_set_saturation"><value name="SATURATION"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="executor_set_exp"><value name="EXP"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+                <block type="executor_give_exp"><value name="AMOUNT"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+                <block type="executor_set_fly_mode"></block>
+                <block type="executor_set_walk_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.2</field></shadow></value></block>
+                <block type="executor_set_fly_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.1</field></shadow></value></block>
+                <block type="executor_velocity">
+                    <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                    <value name="Y"><shadow type="math_number"><field name="NUM">0.5</field></shadow></value>
+                    <value name="Z"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                </block>
+                <block type="executor_set_display_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+            </category>
+            <category name="Inventory" colour="160">
+                <block type="executor_give"></block>
+                <block type="executor_set_item"><value name="SLOT"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+                <block type="executor_clear_inventory"></block>
+                <block type="executor_close_gui"></block>
+            </category>
+            <category name="Effects" colour="160">
+                <block type="executor_potion"><value name="POTION"><shadow type="text"><field name="TEXT">SPEED</field></shadow></value><value name="TIER"><shadow type="math_number"><field name="NUM">0</field></shadow></value><value name="TIME"><shadow type="math_number"><field name="NUM">200</field></shadow></value></block>
+                <block type="executor_clear_potion"></block>
+                <block type="executor_burn"><value name="TIME"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+                <block type="executor_play_sound"><value name="SOUND"><shadow type="text"><field name="TEXT">ENTITY_PLAYER_LEVELUP</field></shadow></value><value name="VOLUME"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="PITCH"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+            </category>
+            <category name="World" colour="160">
+                <block type="executor_explosion"><value name="POWER"><shadow type="math_number"><field name="NUM">4</field></shadow></value></block>
+                <block type="executor_lightning"></block>
+                <block type="executor_set_block"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value></block>
+                <block type="executor_clear_entity"><value name="RADIUS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+                <block type="executor_time"><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
+                <block type="executor_weather"></block>
+            </category>
+            <category name="Commands" colour="160">
+                <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
+                <block type="executor_op_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">gamemode creative</field></shadow></value></block>
+                <block type="executor_console_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">say hello</field></shadow></value></block>
+            </category>
+            <category name="Control" colour="160">
+                <block type="executor_wait"><value name="TIME"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="executor_exit"></block>
+            </category>
+        </category>
+
+        <!-- ── Minecraft: Queries ── -->
+        <category name="Player" colour="230">
+            <block type="player_get_by_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+            <block type="player_get_by_uuid"><value name="UUID"><shadow type="text"></shadow></value></block>
+            <block type="player_get_string"></block>
+            <block type="player_get_number"></block>
+            <block type="player_get_boolean"></block>
+            <block type="player_get_location"></block>
+            <block type="player_get_item"></block>
+            <block type="player_has_permission"><value name="PERMISSION"><shadow type="text"></shadow></value></block>
+            <block type="player_get_online_players"></block>
+        </category>
+
+        <category name="Entity" colour="20">
+            <category name="Get info" colour="20">
+                <block type="entity_get_type"></block>
+                <block type="entity_get_name"></block>
+                <block type="entity_get_health"></block>
+                <block type="entity_get_max_health"></block>
+                <block type="entity_get_location"></block>
+                <block type="entity_get_world"></block>
+                <block type="entity_is_valid"></block>
+                <block type="entity_is_type"><value name="TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+                <block type="entity_as_player"></block>
+            </category>
+            <category name="Actions" colour="20">
+                <block type="entity_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="entity_set_max_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+                <block type="entity_set_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+                <block type="entity_remove"></block>
+                <block type="entity_damage"><value name="DAMAGE"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>
+                <block type="entity_damage_by_player"><value name="DAMAGE"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>
+                <block type="entity_teleport"></block>
+                <block type="entity_set_fire"><value name="TICKS"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+                <block type="entity_set_glowing"></block>
+                <block type="entity_set_gravity"></block>
+                <block type="entity_set_velocity">
+                    <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                    <value name="Y"><shadow type="math_number"><field name="NUM">0.5</field></shadow></value>
+                    <value name="Z"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                </block>
+                <block type="entity_set_silent"></block>
+                <block type="entity_set_invulnerable"></block>
+                <block type="entity_add_potion"><value name="POTION"><shadow type="text"><field name="TEXT">SPEED</field></shadow></value><value name="TIER"><shadow type="math_number"><field name="NUM">0</field></shadow></value><value name="TIME"><shadow type="math_number"><field name="NUM">200</field></shadow></value></block>
+            </category>
+            <category name="Spawn / Search" colour="20">
+                <block type="entity_spawn_at"><value name="TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+                <block type="entity_get_nearby"><value name="RADIUS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+            </category>
+        </category>
+
+        <category name="Location" colour="290">
+            <block type="location">
+                <value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value>
+                <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="Y"><shadow type="math_number"><field name="NUM">64</field></shadow></value>
+                <value name="Z"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+            <block type="location_get_coord"></block>
+            <block type="location_get_world"></block>
+            <block type="location_get_block_type"></block>
+            <block type="location_add">
+                <value name="DX"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="DY"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="DZ"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+            <block type="location_distance"></block>
+        </category>
+
+        <category name="World" colour="120">
+            <block type="world_get"><value name="NAME"><shadow type="text"><field name="TEXT">world</field></shadow></value></block>
+            <block type="world_get_block_at"></block>
+            <block type="world_spawn_entity"><value name="ENTITY_TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+            <block type="world_get_time"></block>
+            <block type="world_set_time"><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
+            <block type="world_get_weather"></block>
+            <block type="world_set_weather"></block>
+            <block type="world_get_players"></block>
+        </category>
+
+        <category name="Item" colour="345">
+            <category name="Create" colour="345">
+                <block type="item_create"><value name="MATERIAL"><shadow type="text"><field name="TEXT">DIAMOND_SWORD</field></shadow></value></block>
+                <block type="item_create_with_amount">
+                    <value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value>
+                    <value name="AMOUNT"><shadow type="math_number"><field name="NUM">64</field></shadow></value>
+                </block>
+            </category>
+            <category name="Get info" colour="345">
+                <block type="item_get_type"></block>
+                <block type="item_get_amount"></block>
+                <block type="item_get_display_name"></block>
+                <block type="item_is_air"></block>
+            </category>
+            <category name="Modify" colour="345">
+                <block type="item_set_display_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+                <block type="item_set_lore"><value name="LORE"><shadow type="text"></shadow></value></block>
+                <block type="item_set_amount"><value name="AMOUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+                <block type="item_enchant">
+                    <value name="ENCHANT"><shadow type="text"><field name="TEXT">DAMAGE_ALL</field></shadow></value>
+                    <value name="LEVEL"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                </block>
+            </category>
+            <category name="Inventory" colour="345">
+                <block type="inventory_get_item"><value name="SLOT"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+                <block type="inventory_set_item"><value name="SLOT"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+                <block type="inventory_add_item"></block>
+                <block type="inventory_remove_type"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value></block>
+                <block type="inventory_contains"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value></block>
+                <block type="inventory_get_size"></block>
+                <block type="inventory_first_empty"></block>
+                <block type="inventory_get_type"></block>
+                <block type="inventory_clear"></block>
+            </category>
+        </category>
+
+        <category name="Scoreboard" colour="260">
+            <block type="scoreboard_get_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_has_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_set_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+                <value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+            <block type="scoreboard_add_score">
+                <value name="AMOUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_reset_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_create_objective">
+                <value name="NAME"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+                <value name="DISPLAY_NAME"><shadow type="text"><field name="TEXT">Kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_set_display_name">
+                <value name="NAME"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+                <value name="DISPLAY_NAME"><shadow type="text"><field name="TEXT">Kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_remove_objective"><value name="NAME"><shadow type="text"><field name="TEXT">kills</field></shadow></value></block>
+            <block type="scoreboard_show_player"></block>
+        </category>
+    </xml>`
 }
 
 function getCommandToolbox() {
   return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">
-  <category name="Logic" colour="%{BKY_LOGIC_HUE}">
-    <block type="controls_if"/><block type="logic_compare"/><block type="logic_operation"/>
-    <block type="logic_negate"/><block type="logic_boolean"/><block type="logic_ternary"/>
-  </category>
-  <category name="Loops" colour="%{BKY_LOOPS_HUE}">
-    <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-    <block type="controls_whileUntil"/><block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
-  </category>
-  <category name="Math" colour="%{BKY_MATH_HUE}">
-    <block type="math_number"/><block type="math_arithmetic"/><block type="math_round"/>
-  </category>
-  <category name="Text" colour="%{BKY_TEXTS_HUE}">
-    <block type="text"/><block type="text_join"/><block type="text_append"/><block type="text_print"/>
-  </category>
-  <sep/>
-  <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
-  <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
-  <sep/>
-  <category name="Command" colour="120">
-    <block type="command_get"/>
-  </category>
-  <category name="Executor" colour="160">
-    <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
-    <block type="executor_teleport"/><block type="executor_give"/>
-    <block type="executor_set_game_mode"/><block type="executor_permission"/>
-    <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
-  </category>
-  <category name="Player" colour="230">
-    <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="player_get_string"/><block type="player_get_location"/>
-  </category>
+        <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+            <block type="controls_if"></block>
+            <block type="logic_compare"></block>
+            <block type="logic_operation"></block>
+            <block type="logic_negate"></block>
+            <block type="logic_boolean"></block>
+            <block type="logic_ternary"></block>
+        </category>
+        <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+            <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+            <block type="controls_whileUntil"></block>
+            <block type="controls_for">
+                <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                <value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            </block>
+            <block type="controls_forEach"></block>
+            <block type="controls_flow_statements"></block>
+        </category>
+        <category name="Math" colour="%{BKY_MATH_HUE}">
+            <block type="math_number"></block>
+            <block type="math_arithmetic"></block>
+            <block type="math_round"></block>
+            <block type="math_modulo"></block>
+            <block type="math_random_int">
+                <value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <value name="TO"><shadow type="math_number"><field name="NUM">100</field></shadow></value>
+            </block>
+        </category>
+        <category name="Text" colour="%{BKY_TEXTS_HUE}">
+            <block type="text"></block>
+            <block type="text_join"></block>
+            <block type="text_append"></block>
+            <block type="text_length"></block>
+            <block type="text_changeCase"></block>
+            <block type="text_trim"></block>
+        </category>
+        <sep></sep>
+        <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"></category>
+        <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"></category>
+        <sep></sep>
+        <category name="Command" colour="120">
+            <block type="command_get"></block>
+            <block type="command_player"></block>
+            <block type="command_check_sender_is_player"></block>
+            <block type="command_arg"><value name="INDEX"><shadow type="math_number"><field name="NUM">0</field></shadow></value></block>
+            <block type="command_args_length"></block>
+            <block type="command_has_args"><value name="COUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+        </category>
+        <category name="Executor" colour="160">
+            <block type="executor_message"><value name="TEXT"><shadow type="text"></shadow></value></block>
+            <block type="executor_action_bar"><value name="TEXT"><shadow type="text"></shadow></value></block>
+            <block type="executor_send_title">
+                <value name="TITLE"><shadow type="text"></shadow></value>
+                <value name="SUBTITLE"><shadow type="text"></shadow></value>
+                <value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value>
+                <value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value>
+                <value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value>
+            </block>
+            <block type="executor_broadcast"><value name="TEXT"><shadow type="text"></shadow></value></block>
+            <block type="executor_teleport"></block>
+            <block type="executor_give"></block>
+            <block type="executor_set_game_mode"></block>
+            <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+            <block type="executor_potion"><value name="POTION"><shadow type="text"><field name="TEXT">SPEED</field></shadow></value><value name="TIER"><shadow type="math_number"><field name="NUM">0</field></shadow></value><value name="TIME"><shadow type="math_number"><field name="NUM">200</field></shadow></value></block>
+            <block type="executor_play_sound"><value name="SOUND"><shadow type="text"><field name="TEXT">ENTITY_PLAYER_LEVELUP</field></shadow></value><value name="VOLUME"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="PITCH"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+            <block type="executor_permission"><value name="PERMISSION"><shadow type="text"></shadow></value></block>
+            <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
+            <block type="executor_console_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">say hello</field></shadow></value></block>
+            <block type="executor_log"><value name="TEXT"><shadow type="text"></shadow></value></block>
+            <block type="executor_wait"><value name="TIME"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+            <block type="executor_exit"></block>
+        </category>
+        <category name="Player" colour="230">
+            <block type="player_get_by_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+            <block type="player_get_string"></block>
+            <block type="player_get_number"></block>
+            <block type="player_get_boolean"></block>
+            <block type="player_get_location"></block>
+            <block type="player_get_item"></block>
+            <block type="player_has_permission"><value name="PERMISSION"><shadow type="text"></shadow></value></block>
+            <block type="player_get_online_players"></block>
+        </category>
+        <category name="Entity" colour="20">
+            <block type="entity_get_type"></block>
+            <block type="entity_get_name"></block>
+            <block type="entity_get_health"></block>
+            <block type="entity_get_location"></block>
+            <block type="entity_is_type"><value name="TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+            <block type="entity_as_player"></block>
+            <block type="entity_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+            <block type="entity_remove"></block>
+            <block type="entity_damage"><value name="DAMAGE"><shadow type="math_number"><field name="NUM">5</field></shadow></value></block>
+            <block type="entity_teleport"></block>
+            <block type="entity_spawn_at"><value name="TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+            <block type="entity_get_nearby"><value name="RADIUS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+        </category>
+        <category name="Location" colour="290">
+            <block type="location">
+                <value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value>
+                <value name="X"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="Y"><shadow type="math_number"><field name="NUM">64</field></shadow></value>
+                <value name="Z"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+            <block type="location_get_coord"></block>
+            <block type="location_add">
+                <value name="DX"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="DY"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+                <value name="DZ"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+        </category>
+        <category name="Item" colour="345">
+            <block type="item_create"><value name="MATERIAL"><shadow type="text"><field name="TEXT">DIAMOND_SWORD</field></shadow></value></block>
+            <block type="item_create_with_amount">
+                <value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value>
+                <value name="AMOUNT"><shadow type="math_number"><field name="NUM">64</field></shadow></value>
+            </block>
+            <block type="item_get_type"></block>
+            <block type="item_get_amount"></block>
+            <block type="item_is_air"></block>
+            <block type="item_set_display_name"><value name="NAME"><shadow type="text"></shadow></value></block>
+            <block type="item_set_lore"><value name="LORE"><shadow type="text"></shadow></value></block>
+            <block type="item_enchant">
+                <value name="ENCHANT"><shadow type="text"><field name="TEXT">DAMAGE_ALL</field></shadow></value>
+                <value name="LEVEL"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+            </block>
+        </category>
+        <category name="Scoreboard" colour="260">
+            <block type="scoreboard_get_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_set_score">
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+                <value name="VALUE"><shadow type="math_number"><field name="NUM">0</field></shadow></value>
+            </block>
+            <block type="scoreboard_add_score">
+                <value name="AMOUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value>
+                <value name="ENTRY"><shadow type="text"></shadow></value>
+                <value name="OBJECTIVE"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_create_objective">
+                <value name="NAME"><shadow type="text"><field name="TEXT">kills</field></shadow></value>
+                <value name="DISPLAY_NAME"><shadow type="text"><field name="TEXT">Kills</field></shadow></value>
+            </block>
+            <block type="scoreboard_show_player"></block>
+        </category>
 </xml>`
 }
