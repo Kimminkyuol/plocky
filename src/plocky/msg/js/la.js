@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2022. ICRL
- * See the file LICENSE.md for copying permission.
- */
-
 // This file was automatically generated.  Do not modify.
 
 'use strict';
