@@ -25,6 +25,8 @@ const filesToCopy = [
   ['blocks_compressed.js', 'blocks_compressed.js'],
   ['java_compressed.js', 'java_compressed.js'],
   [join('msg', 'messages.js'), join('msg', 'messages.js')],
+  ['plocky_blocks.js', 'plocky_blocks.js'],
+  ['plocky_java.js', 'plocky_java.js'],
 ]
 
 for (const [from, to] of filesToCopy) {

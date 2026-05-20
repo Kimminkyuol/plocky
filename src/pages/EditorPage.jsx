@@ -514,7 +514,8 @@ function getEventToolbox() {
   </category>
   <category name="Loops" colour="%{BKY_LOOPS_HUE}">
     <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-    <block type="controls_whileUntil"/><block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+    <block type="controls_whileUntil"/>
+    <block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
     <block type="controls_forEach"/><block type="controls_flow_statements"/>
   </category>
   <category name="Math" colour="%{BKY_MATH_HUE}">
@@ -541,14 +542,8 @@ function getEventToolbox() {
   </category>
   <category name="Executor" colour="160">
     <block type="executor_action_bar"><value name="TEXT"><shadow type="text"/></value></block>
+    <block type="executor_send_title"><value name="TITLE"><shadow type="text"/></value><value name="SUBTITLE"><shadow type="text"/></value><value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value><value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
     <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
-    <block type="executor_kick"><value name="DUE"><shadow type="text"/></value></block>
-    <block type="executor_kill"/><block type="executor_teleport"/>
-    <block type="executor_give"/><block type="executor_set_game_mode"/>
-    <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"/></value></block>
-    <block type="executor_permission"><value name="PERMISSION"><shadow type="text"/></value></block>
     <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
     <block type="executor_wait"><value name="TIME"><shadow type="math_number"/></value></block>
   </category>
