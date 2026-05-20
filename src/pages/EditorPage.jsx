@@ -1,23 +1,20 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import hljs from 'highlight.js/lib/core'
 import java from 'highlight.js/lib/languages/java'
-import { getProject, setProject, clearProject, setProjectProp } from '../utils/store.js'
+import { getProject, setProject, clearProject } from '../utils/store.js'
 import { exportProject, saveProjectFile } from '../utils/export.js'
 import ConfirmModal from '../components/ConfirmModal.jsx'
 import InputModal from '../components/InputModal.jsx'
 
 hljs.registerLanguage('java', java)
 
-// Toolbox XML content (raw strings)
-const TOOLBOX_EVENT_ID = 'event'
-const TOOLBOX_COMMAND_ID = 'command'
+const SIDEBAR_MIN = 140
+const SIDEBAR_MAX = 400
+const SIDEBAR_DEFAULT = 208
 
-export default function EditorPage() {
-  const navigate = useNavigate()
+export default function EditorPage({ onNewProject }) {
   const workspaceRef = useRef(null)
   const blocklyRef = useRef(null)
-  const codeRef = useRef(null)
   const currentFileRef = useRef(null)
 
   const [project, setLocalProject] = useState(getProject)
@@ -28,22 +25,83 @@ export default function EditorPage() {
   const [inputModal, setInputModal] = useState(null)
   const [showCodePanel, setShowCodePanel] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(SIDEBAR_DEFAULT)
+  const [codePanelWidth, setCodePanelWidth] = useState(288)
 
-  // Keep currentFileRef in sync
   useEffect(() => { currentFileRef.current = currentFile }, [currentFile])
 
-  // Initialize Blockly
+  // Blockly 워크스페이스 자동 리사이즈 (사이드바/코드패널 변경 시)
+  useEffect(() => {
+    if (!isReady || !workspaceRef.current) return
+    const ro = new ResizeObserver(() => {
+      if (blocklyRef.current) window.Blockly?.svgResize(blocklyRef.current)
+    })
+    ro.observe(workspaceRef.current)
+    return () => ro.disconnect()
+  }, [isReady])
+
+  // 코드 패널 토글 시 Blockly 리사이즈
+  useEffect(() => {
+    if (blocklyRef.current) window.Blockly?.svgResize(blocklyRef.current)
+  }, [showCodePanel])
+
+  // 사이드바 드래그 리사이즈
+  const startSidebarResize = useCallback((e) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = sidebarWidth
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    const onMove = (e) => {
+      const newWidth = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, startWidth + e.clientX - startX))
+      setSidebarWidth(newWidth)
+    }
+    const onUp = () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      if (blocklyRef.current) window.Blockly?.svgResize(blocklyRef.current)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [sidebarWidth])
+
+  // 코드 패널 드래그 리사이즈 (왼쪽 핸들 → 오른쪽으로 드래그 시 좁아짐)
+  const startCodePanelResize = useCallback((e) => {
+    e.preventDefault()
+    const startX = e.clientX
+    const startWidth = codePanelWidth
+
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    const onMove = (e) => {
+      const newWidth = Math.max(160, Math.min(600, startWidth - (e.clientX - startX)))
+      setCodePanelWidth(newWidth)
+    }
+    const onUp = () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      if (blocklyRef.current) window.Blockly?.svgResize(blocklyRef.current)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }, [codePanelWidth])
+
   useEffect(() => {
     const Blockly = window.Blockly
     if (!Blockly) {
-      console.error('Blockly not loaded. Check script tags in index.html.')
+      console.error('Blockly not loaded.')
       return
     }
 
-    // Override Blockly's built-in prompt with browser prompt
     Blockly.dialog.prompt = (message, defaultValue, callback) => {
-      const result = window.prompt(message, defaultValue)
-      callback(result)
+      callback(window.prompt(message, defaultValue))
     }
     Blockly.dialog.alert = (message, callback) => {
       window.alert(message)
@@ -54,19 +112,12 @@ export default function EditorPage() {
     }
 
     const workspace = Blockly.inject(workspaceRef.current, {
-      grid: { spacing: 24, length: 2, colour: '#1e1e38', snap: true },
+      grid: { spacing: 20, length: 2, colour: '#e5e7eb', snap: true },
       readOnly: false,
       move: { scrollbars: true, drag: true, wheel: true },
-      toolbox: getEmptyToolbox(),
-      theme: buildDarkTheme(Blockly),
-      zoom: {
-        controls: true,
-        wheel: true,
-        startScale: 0.9,
-        maxScale: 4,
-        minScale: 0.2,
-        scaleSpeed: 1.1
-      },
+      toolbox: getEventToolbox(),
+      theme: buildLightTheme(Blockly),
+      zoom: { controls: true, wheel: true, startScale: 0.9, maxScale: 4, minScale: 0.2, scaleSpeed: 1.1 },
       trashcan: true,
     })
 
@@ -91,8 +142,6 @@ export default function EditorPage() {
           .replace(/MainPluginPath/g, proj.groupId)
 
         setGeneratedCode(newCode)
-
-        // Persist workspace state
         finder[idx].code = JSON.stringify(Blockly.serialization.workspaces.save(workspace))
         setProject({ ...proj, finder })
         setLocalProject({ ...proj, finder })
@@ -121,11 +170,9 @@ export default function EditorPage() {
 
     setCurrentFile(idx)
     currentFileRef.current = idx
-
     ws.clear()
-    const toolbox = fileData.type === 'event'
-      ? getEventToolbox()
-      : getCommandToolbox()
+
+    const toolbox = fileData.type === 'event' ? getEventToolbox() : getCommandToolbox()
     ws.updateToolbox(toolbox)
 
     try {
@@ -141,8 +188,8 @@ export default function EditorPage() {
 
   const createFile = useCallback((type) => {
     setInputModal({
-      title: `New ${type === 'event' ? 'Event' : 'Command'}`,
-      message: 'Enter a name (PascalCase):',
+      title: `새 ${type === 'event' ? '이벤트' : '커맨드'}`,
+      message: '이름을 입력하세요 (PascalCase):',
       placeholder: type === 'event' ? 'MyEvent' : 'MyCommand',
       onConfirm: (name) => {
         setInputModal(null)
@@ -151,7 +198,7 @@ export default function EditorPage() {
         const proj = getProject()
         if (!proj) return
         if (proj.finder.some((f) => f.name === trimmed)) {
-          window.alert(`A file named "${trimmed}" already exists.`)
+          window.alert(`"${trimmed}" 파일이 이미 존재합니다.`)
           return
         }
         const newFinder = [...proj.finder, { name: trimmed, type, code: '{}' }]
@@ -169,8 +216,8 @@ export default function EditorPage() {
     const fileData = proj?.finder?.[idx]
     if (!fileData) return
     setConfirmModal({
-      title: 'Delete File',
-      message: `Delete "${fileData.name}"? This cannot be undone.`,
+      title: '파일 삭제',
+      message: `"${fileData.name}"을 삭제하시겠습니까?`,
       onConfirm: () => {
         setConfirmModal(null)
         const newFinder = proj.finder.filter((_, i) => i !== idx)
@@ -205,12 +252,11 @@ export default function EditorPage() {
 
   const handleNewProject = () => {
     setConfirmModal({
-      title: 'New Project',
-      message: 'Start a new project? All unsaved changes will be lost.',
+      title: '새 프로젝트',
+      message: '새 프로젝트를 시작하시겠습니까? 저장되지 않은 변경사항은 사라집니다.',
       onConfirm: () => {
         setConfirmModal(null)
-        clearProject()
-        navigate('/')
+        onNewProject()
       },
       onCancel: () => setConfirmModal(null)
     })
@@ -219,48 +265,50 @@ export default function EditorPage() {
   const finder = project?.finder || []
 
   return (
-    <div className="flex h-screen bg-gray-950 text-white overflow-hidden">
-      {/* ===== SIDEBAR ===== */}
-      <aside className="w-56 flex flex-col bg-gray-900 border-r border-gray-800 flex-shrink-0">
-        {/* Project header */}
-        <div className="px-4 py-4 border-b border-gray-800">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center flex-shrink-0">
-              <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="flex h-screen bg-white text-gray-900 overflow-hidden">
+      {/* SIDEBAR */}
+      <aside
+        className="flex flex-col border-r border-gray-200 flex-shrink-0 bg-white"
+        style={{ width: sidebarWidth }}
+      >
+        <div className="px-4 py-3.5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-gray-900 rounded-md flex items-center justify-center flex-shrink-0">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-white truncate">{project?.projectName}</span>
+            <span className="text-sm font-semibold text-gray-900 truncate">{project?.projectName}</span>
           </div>
-          <p className="text-xs text-gray-600 pl-8">{project?.groupId}</p>
+          <p className="text-xs text-gray-400 mt-0.5 pl-7 truncate">{project?.groupId}</p>
         </div>
 
-        {/* NEW file buttons */}
-        <div className="px-3 py-3 border-b border-gray-800">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2 px-1">New</p>
-          <div className="flex gap-2">
+        <div className="px-3 py-2.5 border-b border-gray-100">
+          <div className="flex gap-1.5">
             <button
               onClick={() => createFile('event')}
-              className="flex-1 flex items-center justify-center gap-1 text-xs bg-gray-800 hover:bg-indigo-600 text-gray-300 hover:text-white py-2 px-2 rounded-lg transition-all duration-150 border border-gray-700 hover:border-indigo-500"
+              className="flex-1 flex items-center justify-center gap-1 text-xs border border-gray-200 hover:bg-gray-50 text-gray-600 py-1.5 rounded-lg transition-colors"
             >
-              <EventIcon />
+              <svg className="w-3 h-3 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
               Event
             </button>
             <button
               onClick={() => createFile('command')}
-              className="flex-1 flex items-center justify-center gap-1 text-xs bg-gray-800 hover:bg-indigo-600 text-gray-300 hover:text-white py-2 px-2 rounded-lg transition-all duration-150 border border-gray-700 hover:border-indigo-500"
+              className="flex-1 flex items-center justify-center gap-1 text-xs border border-gray-200 hover:bg-gray-50 text-gray-600 py-1.5 rounded-lg transition-colors"
             >
-              <CommandIcon />
+              <svg className="w-3 h-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
               CMD
             </button>
           </div>
         </div>
 
-        {/* File finder */}
-        <div className="flex-1 overflow-y-auto py-2">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 py-1">Files</p>
+        <div className="flex-1 overflow-y-auto py-1">
           {finder.length === 0 ? (
-            <p className="text-xs text-gray-700 px-4 py-3 italic">No files yet. Create an Event or Command.</p>
+            <p className="text-xs text-gray-400 px-4 py-4 leading-relaxed">파일이 없습니다.<br />Event 또는 CMD를 만들어보세요.</p>
           ) : (
             finder.map((fileData, idx) => (
               <FileItem
@@ -274,97 +322,127 @@ export default function EditorPage() {
           )}
         </div>
 
-        {/* Bottom actions */}
-        <div className="border-t border-gray-800 px-3 py-3 space-y-1.5">
+        <div className="border-t border-gray-100 px-3 py-3 space-y-1.5">
           <button
             onClick={handleExport}
             disabled={isExporting || finder.length === 0}
-            className="w-full flex items-center justify-center gap-2 text-xs bg-indigo-600/80 hover:bg-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 px-3 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 text-xs bg-gray-900 hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 px-3 rounded-lg transition-colors"
           >
-            <DownloadIcon />
-            {isExporting ? 'Exporting...' : 'Export ZIP'}
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            {isExporting ? '내보내는 중...' : 'ZIP 내보내기'}
           </button>
           <button
             onClick={() => saveProjectFile(getProject())}
-            className="w-full flex items-center justify-center gap-2 text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 py-2 px-3 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 text-xs border border-gray-200 hover:bg-gray-50 text-gray-600 py-2 px-3 rounded-lg transition-colors"
           >
-            <SaveIcon />
-            Save .plocky
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            .plocky 저장
           </button>
           <button
             onClick={handleNewProject}
-            className="w-full flex items-center justify-center gap-2 text-xs text-gray-600 hover:text-red-400 py-1.5 transition-colors"
+            className="w-full text-xs text-gray-400 hover:text-gray-600 py-1.5 transition-colors"
           >
-            New Project
+            새 프로젝트
           </button>
         </div>
       </aside>
 
-      {/* ===== WORKSPACE ===== */}
+      {/* SIDEBAR DRAG HANDLE */}
+      <div
+        className="w-1 flex-shrink-0 hover:bg-blue-400 active:bg-blue-500 transition-colors cursor-col-resize"
+        onMouseDown={startSidebarResize}
+      />
+
+      {/* WORKSPACE */}
       <main className="flex-1 flex flex-col relative overflow-hidden">
         {!isReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-950 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
             <div className="text-center">
-              <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">Loading workspace...</p>
+              <div className="w-5 h-5 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-gray-400 text-xs">불러오는 중...</p>
             </div>
           </div>
         )}
         {currentFile === null && isReady && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center opacity-30">
-              <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center">
+              <svg className="w-10 h-10 text-gray-200 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <p className="text-gray-500 text-sm">Double-click a file to open it</p>
+              <p className="text-gray-300 text-sm">파일을 선택하세요</p>
             </div>
           </div>
         )}
-        <div ref={workspaceRef} className="blockly-workspace flex-1" />
+        <div
+          ref={workspaceRef}
+          className="blockly-workspace flex-1"
+          onMouseDown={() => {
+            // 플라이아웃 닫힌 후 스크롤바 복구
+            requestAnimationFrame(() => {
+              if (blocklyRef.current) window.Blockly?.svgResize(blocklyRef.current)
+            })
+          }}
+        />
       </main>
 
-      {/* ===== CODE PANEL ===== */}
+      {/* CODE PANEL */}
       {showCodePanel && (
-        <aside className="w-72 flex flex-col bg-gray-900 border-l border-gray-800 flex-shrink-0 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Generated Java</span>
-            <button
-              onClick={() => setShowCodePanel(false)}
-              className="text-gray-600 hover:text-gray-400 transition-colors"
-              title="Hide code panel"
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
-          <div className="code-viewer flex-1 overflow-auto bg-gray-950">
-            {generatedCode ? (
-              <pre
-                className="hljs"
-                dangerouslySetInnerHTML={{
-                  __html: hljs.highlight(generatedCode, { language: 'java' }).value
-                }}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <p className="text-gray-700 text-xs italic">Open a file to see generated code</p>
-              </div>
-            )}
-          </div>
-        </aside>
+        <>
+          {/* CODE PANEL DRAG HANDLE */}
+          <div
+            className="w-1 flex-shrink-0 hover:bg-blue-400 active:bg-blue-500 transition-colors cursor-col-resize"
+            onMouseDown={startCodePanelResize}
+          />
+          <aside
+            className="flex flex-col bg-gray-50 flex-shrink-0 overflow-hidden"
+            style={{ width: codePanelWidth }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <span className="text-xs font-medium text-gray-500">Generated Java</span>
+              <button
+                onClick={() => setShowCodePanel(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                title="패널 닫기"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            <div className="code-viewer flex-1 overflow-auto">
+              {generatedCode ? (
+                <pre
+                  className="hljs"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(generatedCode, { language: 'java' }).value
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-400 text-xs">파일을 열면 코드가 표시됩니다</p>
+                </div>
+              )}
+            </div>
+          </aside>
+        </>
       )}
 
-      {/* Show code panel toggle (when hidden) */}
       {!showCodePanel && (
         <button
           onClick={() => setShowCodePanel(true)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-400 hover:text-white px-2 py-4 rounded-l-lg transition-colors z-10"
-          title="Show code panel"
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 border border-gray-200 text-gray-400 hover:text-gray-600 px-2 py-4 rounded-l-lg transition-colors z-10"
+          title="코드 패널 열기"
         >
-          <ChevronLeftIcon />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </button>
       )}
 
-      {/* Modals */}
       {confirmModal && <ConfirmModal {...confirmModal} />}
       {inputModal && <InputModal {...inputModal} />}
     </div>
@@ -373,27 +451,24 @@ export default function EditorPage() {
 
 function FileItem({ fileData, isActive, onClick, onDelete }) {
   const [showDelete, setShowDelete] = useState(false)
-  const typeColor = fileData.type === 'event' ? 'text-green-400' : 'text-blue-400'
-  const typeBg = fileData.type === 'event' ? 'bg-green-400/10' : 'bg-blue-400/10'
 
   return (
     <div
-      className={`file-item flex items-center justify-between px-3 py-2 mx-2 my-0.5 rounded-lg cursor-pointer group ${isActive ? 'active' : ''}`}
+      className={`file-item flex items-center justify-between px-3 py-2 mx-1.5 my-0.5 rounded-lg cursor-pointer ${isActive ? 'active' : ''}`}
       onClick={onClick}
       onMouseEnter={() => setShowDelete(true)}
       onMouseLeave={() => setShowDelete(false)}
     >
       <div className="flex items-center gap-2 min-w-0">
-        <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${typeBg} ${typeColor} flex-shrink-0`}>
+        <span className={`text-xs font-semibold w-4 text-center flex-shrink-0 ${fileData.type === 'event' ? 'text-amber-500' : 'text-blue-500'}`}>
           {fileData.type === 'event' ? 'E' : 'C'}
         </span>
-        <span className="text-sm text-gray-300 truncate font-medium">{fileData.name}</span>
+        <span className="text-sm text-gray-700 truncate">{fileData.name}</span>
       </div>
       {showDelete && (
         <button
           onClick={(e) => { e.stopPropagation(); onDelete() }}
-          className="text-gray-600 hover:text-red-400 transition-colors flex-shrink-0 ml-2"
-          title="Delete file"
+          className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0 ml-1"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -406,36 +481,33 @@ function FileItem({ fileData, isActive, onClick, onDelete }) {
 
 // --- Blockly helpers ---
 
-function buildDarkTheme(Blockly) {
+function buildLightTheme(Blockly) {
   if (!Blockly.Theme) return undefined
   try {
-    return Blockly.Theme.defineTheme('plocky_dark', {
+    return Blockly.Theme.defineTheme('plocky_light', {
       base: Blockly.Themes?.Classic,
       componentStyles: {
-        workspaceBackgroundColour: '#0a0a12',
-        toolboxBackgroundColour: '#0f0f1a',
-        toolboxForegroundColour: '#c0c0e0',
-        flyoutBackgroundColour: '#14141e',
-        flyoutForegroundColour: '#c0c0e0',
+        workspaceBackgroundColour: '#ffffff',
+        toolboxBackgroundColour: '#f3f4f6',
+        toolboxForegroundColour: '#1f2937',
+        flyoutBackgroundColour: '#f9fafb',
+        flyoutForegroundColour: '#1f2937',
         flyoutOpacity: 1,
-        scrollbarColour: '#3a3a5c',
-        insertionMarkerColour: '#6366f1',
+        scrollbarColour: '#d1d5db',
+        insertionMarkerColour: '#3b82f6',
         insertionMarkerOpacity: 0.5,
-        markerColour: '#6366f1',
-        cursorColour: '#6366f1',
+        markerColour: '#3b82f6',
+        cursorColour: '#3b82f6',
       },
-      fontStyle: { family: "'JetBrains Mono', monospace", size: 11 }
+      fontStyle: { family: 'Inter, system-ui, sans-serif', size: 11 }
     })
   } catch {
     return undefined
   }
 }
 
-function getEmptyToolbox() {
-  return '<xml xmlns="https://developers.google.com/blockly/xml"></xml>'
-}
-
-const STANDARD_CATEGORIES = `
+function getEventToolbox() {
+  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">
   <category name="Logic" colour="%{BKY_LOGIC_HUE}">
     <block type="controls_if"/><block type="logic_compare"/><block type="logic_operation"/>
     <block type="logic_negate"/><block type="logic_boolean"/><block type="logic_ternary"/>
@@ -462,166 +534,64 @@ const STANDARD_CATEGORIES = `
   <sep/>
   <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
   <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
-  <sep/>`
-
-const EXECUTOR_CATEGORY = `
-  <category name="⚙️ Executor" colour="160">
-    <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
+  <sep/>
+  <category name="Event" colour="65">
+    <block type="event_cancel"/><block type="event_get"/>
+    <block type="event_server_state_change"/><block type="event_player_interact"/>
+    <block type="event_player_walk"/><block type="event_inventory"/>
+  </category>
+  <category name="Executor" colour="160">
     <block type="executor_action_bar"><value name="TEXT"><shadow type="text"/></value></block>
     <block type="executor_send_title"><value name="TITLE"><shadow type="text"/></value><value name="SUBTITLE"><shadow type="text"/></value><value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value><value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
     <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
     <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_kill"/>
-    <block type="executor_kick"><value name="DUE"><shadow type="text"/></value></block>
-    <block type="executor_teleport"/>
-    <block type="executor_velocity"><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="Z"><shadow type="math_number"/></value></block>
-    <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
-    <block type="executor_set_max_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
-    <block type="executor_set_saturation"><value name="SATURATION"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
-    <block type="executor_set_exp"><value name="EXP"><shadow type="math_number"/></value></block>
-    <block type="executor_give_exp"><value name="AMOUNT"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
-    <block type="executor_set_game_mode"/>
-    <block type="executor_set_fly_mode"/>
-    <block type="executor_set_walk_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.2</field></shadow></value></block>
-    <block type="executor_set_fly_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.1</field></shadow></value></block>
-    <block type="executor_set_display_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="executor_give"/>
-    <block type="executor_set_item"><value name="SLOT"><shadow type="math_number"/></value></block>
-    <block type="executor_clear_inventory"/>
-    <block type="executor_close_gui"/>
-    <block type="executor_burn"><value name="TIME"><shadow type="math_number"><field name="NUM">60</field></shadow></value></block>
-    <block type="executor_play_sound"><value name="SOUND"><shadow type="text"><field name="TEXT">ENTITY_PLAYER_LEVELUP</field></shadow></value><value name="VOLUME"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="PITCH"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
-    <block type="executor_potion"><value name="POTION"><shadow type="text"><field name="TEXT">SPEED</field></shadow></value><value name="TIER"><shadow type="math_number"/></value><value name="TIME"><shadow type="math_number"><field name="NUM">200</field></shadow></value></block>
-    <block type="executor_clear_potion"/>
-    <block type="executor_explosion"><value name="POWER"><shadow type="math_number"><field name="NUM">4</field></shadow></value></block>
-    <block type="executor_lightning"/>
-    <block type="executor_set_block"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value></block>
-    <block type="executor_clear_entity"><value name="RADIUS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-    <block type="executor_time"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
-    <block type="executor_weather"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value></block>
-    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
-    <block type="executor_op_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">op Player</field></shadow></value></block>
-    <block type="executor_console_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">say hello</field></shadow></value></block>
-    <block type="executor_money"><value name="MONEY"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
-    <block type="executor_permission"><value name="PERMISSION"><shadow type="text"><field name="TEXT">my.permission</field></shadow></value></block>
-    <block type="executor_db_put"><value name="KEY"><shadow type="text"/></value></block>
-    <block type="executor_db_save"/>
-    <block type="executor_wait"><value name="TIME"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
-    <block type="executor_exit"/>
-  </category>`
-
-const PLAYER_CATEGORY = `
-  <category name="👤 Player" colour="230">
+    <block type="executor_wait"><value name="TIME"><shadow type="math_number"/></value></block>
+  </category>
+  <category name="Player" colour="230">
     <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="player_get_by_uuid"><value name="UUID"><shadow type="text"/></value></block>
-    <block type="player_get_string"/>
-    <block type="player_get_number"/>
-    <block type="player_get_boolean"/>
-    <block type="player_get_location"/>
-    <block type="player_get_item"/>
-    <block type="player_has_permission"><value name="PERMISSION"><shadow type="text"><field name="TEXT">my.permission</field></shadow></value></block>
-    <block type="player_get_any"><value name="KEY"><shadow type="text"/></value></block>
-    <block type="player_get_online_players"/>
-  </category>`
-
-const LOCATION_CATEGORY = `
-  <category name="📍 Location" colour="290">
-    <block type="location"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"><field name="NUM">64</field></shadow></value><value name="Z"><shadow type="math_number"/></value></block>
-    <block type="location_get_coord"/>
-    <block type="location_get_world"/>
-    <block type="location_get_block_type"/>
-    <block type="location_add"><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"/></value><value name="Z"><shadow type="math_number"/></value></block>
-    <block type="location_distance"/>
-  </category>`
-
-const ITEM_CATEGORY = `
-  <category name="📦 Item" colour="345">
-    <block type="item_create"><value name="MATERIAL"><shadow type="text"><field name="TEXT">DIAMOND</field></shadow></value></block>
-    <block type="item_create_with_amount"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value><value name="AMOUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
-    <block type="item_get_type"/>
-    <block type="item_get_amount"/>
-    <block type="item_is_air"/>
-    <block type="item_set_display_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="item_set_lore"><value name="LORE"><shadow type="text"/></value></block>
-  </category>`
-
-const WORLD_CATEGORY = `
-  <category name="🌍 World" colour="120">
-    <block type="world_get"><value name="NAME"><shadow type="text"><field name="TEXT">world</field></shadow></value></block>
-    <block type="world_get_block_at"/>
-    <block type="world_spawn_entity"><value name="ENTITY_TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
-    <block type="world_get_time"/>
-    <block type="world_set_time"><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
-    <block type="world_get_weather"/>
-    <block type="world_set_weather"/>
-    <block type="world_get_players"/>
-  </category>`
-
-function getEventToolbox() {
-  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">${STANDARD_CATEGORIES}
-  <category name="⚡ Event" colour="65">
-    <block type="event_server_state_change"/>
-    <block type="event_player_join"/>
-    <block type="event_player_quit"/>
-    <block type="event_player_walk"/>
-    <block type="event_player_death"/>
-    <block type="event_player_respawn"/>
-    <block type="event_player_interact"/>
-    <block type="event_chat"/>
-    <block type="event_block_break"/>
-    <block type="event_block_place"/>
-    <block type="event_entity_damage"/>
-    <block type="event_entity_damage_by_entity"/>
-    <block type="event_inventory"/>
-    <block type="event_get"/>
-    <block type="event_cancel"/>
-    <block type="event_set_message"><value name="MESSAGE"><shadow type="text"/></value></block>
-    <block type="event_set_damage"><value name="DAMAGE"><shadow type="math_number"/></value></block>
-  </category>${EXECUTOR_CATEGORY}${PLAYER_CATEGORY}${LOCATION_CATEGORY}${ITEM_CATEGORY}${WORLD_CATEGORY}
+    <block type="player_get_string"/><block type="player_get_number"/>
+    <block type="player_get_boolean"/><block type="player_get_location"/><block type="player_get_item"/>
+  </category>
+  <category name="Location" colour="290">
+    <block type="location"><value name="WORLD"><shadow type="text"/></value><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"/></value><value name="Z"><shadow type="math_number"/></value></block>
+  </category>
 </xml>`
 }
 
 function getCommandToolbox() {
-  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">${STANDARD_CATEGORIES}
-  <category name="🗨️ Command" colour="65">
+  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">
+  <category name="Logic" colour="%{BKY_LOGIC_HUE}">
+    <block type="controls_if"/><block type="logic_compare"/><block type="logic_operation"/>
+    <block type="logic_negate"/><block type="logic_boolean"/><block type="logic_ternary"/>
+  </category>
+  <category name="Loops" colour="%{BKY_LOOPS_HUE}">
+    <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+    <block type="controls_whileUntil"/><block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+  </category>
+  <category name="Math" colour="%{BKY_MATH_HUE}">
+    <block type="math_number"/><block type="math_arithmetic"/><block type="math_round"/>
+  </category>
+  <category name="Text" colour="%{BKY_TEXTS_HUE}">
+    <block type="text"/><block type="text_join"/><block type="text_append"/><block type="text_print"/>
+  </category>
+  <sep/>
+  <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
+  <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
+  <sep/>
+  <category name="Command" colour="120">
     <block type="command_get"/>
-    <block type="command_player"/>
-    <block type="command_check_sender_is_player"/>
-    <block type="command_arg"><value name="INDEX"><shadow type="math_number"/></value></block>
-    <block type="command_args_length"/>
-    <block type="command_has_args"/>
-  </category>${EXECUTOR_CATEGORY}${PLAYER_CATEGORY}${LOCATION_CATEGORY}${ITEM_CATEGORY}${WORLD_CATEGORY}
+  </category>
+  <category name="Executor" colour="160">
+    <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
+    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
+    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
+    <block type="executor_teleport"/><block type="executor_give"/>
+    <block type="executor_set_game_mode"/><block type="executor_permission"/>
+    <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
+  </category>
+  <category name="Player" colour="230">
+    <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
+    <block type="player_get_string"/><block type="player_get_location"/>
+  </category>
 </xml>`
-}
-
-// Icons
-function EventIcon() {
-  return <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-  </svg>
-}
-function CommandIcon() {
-  return <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-}
-function DownloadIcon() {
-  return <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-}
-function SaveIcon() {
-  return <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-  </svg>
-}
-function ChevronRightIcon() {
-  return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-  </svg>
-}
-function ChevronLeftIcon() {
-  return <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-  </svg>
 }
