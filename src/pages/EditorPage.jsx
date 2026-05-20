@@ -435,15 +435,15 @@ function getEmptyToolbox() {
   return '<xml xmlns="https://developers.google.com/blockly/xml"></xml>'
 }
 
-function getEventToolbox() {
-  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">
+const STANDARD_CATEGORIES = `
   <category name="Logic" colour="%{BKY_LOGIC_HUE}">
     <block type="controls_if"/><block type="logic_compare"/><block type="logic_operation"/>
     <block type="logic_negate"/><block type="logic_boolean"/><block type="logic_ternary"/>
   </category>
   <category name="Loops" colour="%{BKY_LOOPS_HUE}">
     <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-    <block type="controls_whileUntil"/><block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+    <block type="controls_whileUntil"/>
+    <block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
     <block type="controls_forEach"/><block type="controls_flow_statements"/>
   </category>
   <category name="Math" colour="%{BKY_MATH_HUE}">
@@ -462,71 +462,135 @@ function getEventToolbox() {
   <sep/>
   <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
   <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
-  <sep/>
-  <category name="⚡ Event" colour="65">
-    <block type="event_cancel"/><block type="event_get"/>
-    <block type="event_server_state_change"/><block type="event_player_interact"/>
-    <block type="event_player_walk"/><block type="event_inventory"/>
-  </category>
+  <sep/>`
+
+const EXECUTOR_CATEGORY = `
   <category name="⚙️ Executor" colour="160">
-    <block type="executor_action_bar"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
     <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
-    <block type="executor_kick"><value name="DUE"><shadow type="text"/></value></block>
-    <block type="executor_kill"/><block type="executor_teleport"/>
-    <block type="executor_give"/><block type="executor_set_game_mode"/>
-    <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"/></value></block>
-    <block type="executor_permission"><value name="PERMISSION"><shadow type="text"/></value></block>
+    <block type="executor_action_bar"><value name="TEXT"><shadow type="text"/></value></block>
+    <block type="executor_send_title"><value name="TITLE"><shadow type="text"/></value><value name="SUBTITLE"><shadow type="text"/></value><value name="FADE_IN"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="STAY"><shadow type="math_number"><field name="NUM">70</field></shadow></value><value name="FADE_OUT"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
     <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_wait"><value name="TIME"><shadow type="math_number"/></value></block>
-  </category>
+    <block type="executor_kill"/>
+    <block type="executor_kick"><value name="DUE"><shadow type="text"/></value></block>
+    <block type="executor_teleport"/>
+    <block type="executor_velocity"><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="Z"><shadow type="math_number"/></value></block>
+    <block type="executor_set_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+    <block type="executor_set_max_health"><value name="HEALTH"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+    <block type="executor_set_saturation"><value name="SATURATION"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+    <block type="executor_set_exp"><value name="EXP"><shadow type="math_number"/></value></block>
+    <block type="executor_give_exp"><value name="AMOUNT"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+    <block type="executor_set_game_mode"/>
+    <block type="executor_set_fly_mode"/>
+    <block type="executor_set_walk_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.2</field></shadow></value></block>
+    <block type="executor_set_fly_speed"><value name="SPEED"><shadow type="math_number"><field name="NUM">0.1</field></shadow></value></block>
+    <block type="executor_set_display_name"><value name="NAME"><shadow type="text"/></value></block>
+    <block type="executor_give"/>
+    <block type="executor_set_item"><value name="SLOT"><shadow type="math_number"/></value></block>
+    <block type="executor_clear_inventory"/>
+    <block type="executor_close_gui"/>
+    <block type="executor_burn"><value name="TIME"><shadow type="math_number"><field name="NUM">60</field></shadow></value></block>
+    <block type="executor_play_sound"><value name="SOUND"><shadow type="text"><field name="TEXT">ENTITY_PLAYER_LEVELUP</field></shadow></value><value name="VOLUME"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="PITCH"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+    <block type="executor_potion"><value name="POTION"><shadow type="text"><field name="TEXT">SPEED</field></shadow></value><value name="TIER"><shadow type="math_number"/></value><value name="TIME"><shadow type="math_number"><field name="NUM">200</field></shadow></value></block>
+    <block type="executor_clear_potion"/>
+    <block type="executor_explosion"><value name="POWER"><shadow type="math_number"><field name="NUM">4</field></shadow></value></block>
+    <block type="executor_lightning"/>
+    <block type="executor_set_block"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value></block>
+    <block type="executor_clear_entity"><value name="RADIUS"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
+    <block type="executor_time"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
+    <block type="executor_weather"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value></block>
+    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
+    <block type="executor_op_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">op Player</field></shadow></value></block>
+    <block type="executor_console_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">say hello</field></shadow></value></block>
+    <block type="executor_money"><value name="MONEY"><shadow type="math_number"><field name="NUM">100</field></shadow></value></block>
+    <block type="executor_permission"><value name="PERMISSION"><shadow type="text"><field name="TEXT">my.permission</field></shadow></value></block>
+    <block type="executor_db_put"><value name="KEY"><shadow type="text"/></value></block>
+    <block type="executor_db_save"/>
+    <block type="executor_wait"><value name="TIME"><shadow type="math_number"><field name="NUM">20</field></shadow></value></block>
+    <block type="executor_exit"/>
+  </category>`
+
+const PLAYER_CATEGORY = `
   <category name="👤 Player" colour="230">
     <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="player_get_string"/><block type="player_get_number"/>
-    <block type="player_get_boolean"/><block type="player_get_location"/><block type="player_get_item"/>
-  </category>
+    <block type="player_get_by_uuid"><value name="UUID"><shadow type="text"/></value></block>
+    <block type="player_get_string"/>
+    <block type="player_get_number"/>
+    <block type="player_get_boolean"/>
+    <block type="player_get_location"/>
+    <block type="player_get_item"/>
+    <block type="player_has_permission"><value name="PERMISSION"><shadow type="text"><field name="TEXT">my.permission</field></shadow></value></block>
+    <block type="player_get_any"><value name="KEY"><shadow type="text"/></value></block>
+    <block type="player_get_online_players"/>
+  </category>`
+
+const LOCATION_CATEGORY = `
   <category name="📍 Location" colour="290">
-    <block type="location"><value name="WORLD"><shadow type="text"/></value><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"/></value><value name="Z"><shadow type="math_number"/></value></block>
-  </category>
+    <block type="location"><value name="WORLD"><shadow type="text"><field name="TEXT">world</field></shadow></value><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"><field name="NUM">64</field></shadow></value><value name="Z"><shadow type="math_number"/></value></block>
+    <block type="location_get_coord"/>
+    <block type="location_get_world"/>
+    <block type="location_get_block_type"/>
+    <block type="location_add"><value name="X"><shadow type="math_number"/></value><value name="Y"><shadow type="math_number"/></value><value name="Z"><shadow type="math_number"/></value></block>
+    <block type="location_distance"/>
+  </category>`
+
+const ITEM_CATEGORY = `
+  <category name="📦 Item" colour="345">
+    <block type="item_create"><value name="MATERIAL"><shadow type="text"><field name="TEXT">DIAMOND</field></shadow></value></block>
+    <block type="item_create_with_amount"><value name="MATERIAL"><shadow type="text"><field name="TEXT">STONE</field></shadow></value><value name="AMOUNT"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
+    <block type="item_get_type"/>
+    <block type="item_get_amount"/>
+    <block type="item_is_air"/>
+    <block type="item_set_display_name"><value name="NAME"><shadow type="text"/></value></block>
+    <block type="item_set_lore"><value name="LORE"><shadow type="text"/></value></block>
+  </category>`
+
+const WORLD_CATEGORY = `
+  <category name="🌍 World" colour="120">
+    <block type="world_get"><value name="NAME"><shadow type="text"><field name="TEXT">world</field></shadow></value></block>
+    <block type="world_get_block_at"/>
+    <block type="world_spawn_entity"><value name="ENTITY_TYPE"><shadow type="text"><field name="TEXT">ZOMBIE</field></shadow></value></block>
+    <block type="world_get_time"/>
+    <block type="world_set_time"><value name="TIME"><shadow type="math_number"><field name="NUM">6000</field></shadow></value></block>
+    <block type="world_get_weather"/>
+    <block type="world_set_weather"/>
+    <block type="world_get_players"/>
+  </category>`
+
+function getEventToolbox() {
+  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">${STANDARD_CATEGORIES}
+  <category name="⚡ Event" colour="65">
+    <block type="event_server_state_change"/>
+    <block type="event_player_join"/>
+    <block type="event_player_quit"/>
+    <block type="event_player_walk"/>
+    <block type="event_player_death"/>
+    <block type="event_player_respawn"/>
+    <block type="event_player_interact"/>
+    <block type="event_chat"/>
+    <block type="event_block_break"/>
+    <block type="event_block_place"/>
+    <block type="event_entity_damage"/>
+    <block type="event_entity_damage_by_entity"/>
+    <block type="event_inventory"/>
+    <block type="event_get"/>
+    <block type="event_cancel"/>
+    <block type="event_set_message"><value name="MESSAGE"><shadow type="text"/></value></block>
+    <block type="event_set_damage"><value name="DAMAGE"><shadow type="math_number"/></value></block>
+  </category>${EXECUTOR_CATEGORY}${PLAYER_CATEGORY}${LOCATION_CATEGORY}${ITEM_CATEGORY}${WORLD_CATEGORY}
 </xml>`
 }
 
 function getCommandToolbox() {
-  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">
-  <category name="Logic" colour="%{BKY_LOGIC_HUE}">
-    <block type="controls_if"/><block type="logic_compare"/><block type="logic_operation"/>
-    <block type="logic_negate"/><block type="logic_boolean"/><block type="logic_ternary"/>
-  </category>
-  <category name="Loops" colour="%{BKY_LOOPS_HUE}">
-    <block type="controls_repeat_ext"><value name="TIMES"><shadow type="math_number"><field name="NUM">10</field></shadow></value></block>
-    <block type="controls_whileUntil"/><block type="controls_for"><value name="FROM"><shadow type="math_number"><field name="NUM">1</field></shadow></value><value name="TO"><shadow type="math_number"><field name="NUM">10</field></shadow></value><value name="BY"><shadow type="math_number"><field name="NUM">1</field></shadow></value></block>
-  </category>
-  <category name="Math" colour="%{BKY_MATH_HUE}">
-    <block type="math_number"/><block type="math_arithmetic"/><block type="math_round"/>
-  </category>
-  <category name="Text" colour="%{BKY_TEXTS_HUE}">
-    <block type="text"/><block type="text_join"/><block type="text_append"/><block type="text_print"/>
-  </category>
-  <sep/>
-  <category name="Variables" colour="%{BKY_VARIABLES_HUE}" custom="VARIABLE"/>
-  <category name="Functions" colour="%{BKY_PROCEDURES_HUE}" custom="PROCEDURE"/>
-  <sep/>
-  <category name="🗨️ Command" colour="120">
+  return `<xml xmlns="https://developers.google.com/blockly/xml" id="toolbox">${STANDARD_CATEGORIES}
+  <category name="🗨️ Command" colour="65">
     <block type="command_get"/>
-  </category>
-  <category name="⚙️ Executor" colour="160">
-    <block type="executor_message"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_broadcast"><value name="TEXT"><shadow type="text"/></value></block>
-    <block type="executor_command"><value name="COMMAND"><shadow type="text"><field name="TEXT">help</field></shadow></value></block>
-    <block type="executor_teleport"/><block type="executor_give"/>
-    <block type="executor_set_game_mode"/><block type="executor_permission"/>
-    <block type="executor_log"><value name="TEXT"><shadow type="text"/></value></block>
-  </category>
-  <category name="👤 Player" colour="230">
-    <block type="player_get_by_name"><value name="NAME"><shadow type="text"/></value></block>
-    <block type="player_get_string"/><block type="player_get_location"/>
-  </category>
+    <block type="command_player"/>
+    <block type="command_check_sender_is_player"/>
+    <block type="command_arg"><value name="INDEX"><shadow type="math_number"/></value></block>
+    <block type="command_args_length"/>
+    <block type="command_has_args"/>
+  </category>${EXECUTOR_CATEGORY}${PLAYER_CATEGORY}${LOCATION_CATEGORY}${ITEM_CATEGORY}${WORLD_CATEGORY}
 </xml>`
 }
 
